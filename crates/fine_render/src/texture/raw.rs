@@ -1,4 +1,4 @@
-use crate::context::Context;
+use crate::{context::Context, prelude::DEFAULT_TEXTURE_FORMAT};
 use std::num::NonZeroU32;
 
 pub struct RawTexture {
@@ -30,7 +30,7 @@ impl RawTexture {
             mip_level_count: 1,
             sample_count: 1,
             dimension: wgpu::TextureDimension::D2,
-            format: wgpu::TextureFormat::Bgra8Unorm,
+            format: DEFAULT_TEXTURE_FORMAT,
             usage: wgpu::TextureUsages::COPY_DST | usage,
         });
 

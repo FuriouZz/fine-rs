@@ -1,6 +1,6 @@
 use super::{RawTexture, Texture};
 use crate::context::Context;
-use crate::prelude::TextureSource;
+use crate::prelude::{DEFAULT_TEXTURE_FORMAT, TextureSource};
 use std::collections::HashMap;
 use std::num::NonZeroU32;
 
@@ -38,13 +38,13 @@ impl TextureAtlas {
             mip_level_count: 1,
             sample_count: 1,
             dimension: wgpu::TextureDimension::D2,
-            format: wgpu::TextureFormat::Bgra8Unorm,
+            format: DEFAULT_TEXTURE_FORMAT,
             usage: wgpu::TextureUsages::COPY_SRC | wgpu::TextureUsages::COPY_DST,
         });
 
         let view = texture.create_view(&wgpu::TextureViewDescriptor {
             label: None,
-            format: Some(wgpu::TextureFormat::Bgra8Unorm),
+            format: Some(DEFAULT_TEXTURE_FORMAT),
             dimension: Some(wgpu::TextureViewDimension::D2Array),
             aspect: wgpu::TextureAspect::default(),
             base_mip_level: 0,
@@ -171,7 +171,7 @@ impl TextureAtlas {
 
             let raw = gpu.create_texture(&wgpu::TextureDescriptor {
                 label: Some("[fine::graphic::TextureAtlas] frame_to_raw_texture"),
-                format: wgpu::TextureFormat::Bgra8Unorm,
+                format: DEFAULT_TEXTURE_FORMAT,
                 dimension: wgpu::TextureDimension::D2,
                 size: wgpu::Extent3d {
                     width,

@@ -1,6 +1,6 @@
 use super::RawTexture;
 use std::num::NonZeroU32;
-use crate::context::Context;
+use crate::{context::Context, prelude::DEFAULT_TEXTURE_FORMAT};
 
 pub struct Texture {
     view: wgpu::TextureView,
@@ -13,7 +13,7 @@ impl Texture {
         // Create texture view
         let view = raw.as_raw().create_view(&wgpu::TextureViewDescriptor {
             label: None,
-            format: Some(wgpu::TextureFormat::Bgra8Unorm),
+            format: Some(DEFAULT_TEXTURE_FORMAT),
             dimension: Some(wgpu::TextureViewDimension::D2),
             aspect: wgpu::TextureAspect::default(),
             base_mip_level: 0,
