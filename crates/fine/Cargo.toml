@@ -1,0 +1,21 @@
+[package]
+name = "fine"
+version = "0.1.0"
+authors = ["furiouzz <christophe.massolin@gmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+winit = "0.25.0"
+fine_render = { path = "../fine_render" }
+fine_transform = { path = "../fine_transform" }
+gltf = "0.16"
+bytemuck = "1.4.1"
+glam = { version = "0.18.0", features = ["bytemuck"] }
+
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+futures = { version = "0.3.17", default-features = false, features = ["std", "executor"] }
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+wasm-bindgen-futures = "0.4.18"
