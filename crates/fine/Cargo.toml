@@ -11,7 +11,7 @@ license = "MIT OR Apache-2.0"
 winit = "0.25.0"
 fine_render = { path = "../fine_render" }
 fine_transform = { path = "../fine_transform" }
-gltf = "0.16"
+# gltf = "0.16"
 bytemuck = "1.4.1"
 glam = { version = "0.18.0", features = ["bytemuck"] }
 

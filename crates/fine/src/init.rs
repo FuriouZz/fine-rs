@@ -36,10 +36,12 @@ pub(crate) fn init_event_loop<S: 'static + Scene>(
 
     #[cfg(not(target_arch = "wasm32"))]
     let mut last_update_inst = Instant::now();
+
+    // winit has window.current_monitor().video_modes() but that is a list of all full screen video modes.
+    // So without extra dependencies it's a bit tricky to get the max refresh rate we can run the window on.
+    // Therefore we just go with 60fps - sorry 120hz+ folks!
     #[cfg(not(target_arch = "wasm32"))]
-    let mut last_frame_inst = Instant::now();
-    #[cfg(not(target_arch = "wasm32"))]
-    let (mut frame_count, mut accum_time) = (0, 0.0);
+    let target_frametime = Duration::from_secs_f64(1.0 / 60.0);
 
     event_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Wait;
@@ -64,11 +66,6 @@ pub(crate) fn init_event_loop<S: 'static + Scene>(
                 {
                     // Clamp to some max framerate to avoid busy-looping too much
                     // (we might be in wgpu::PresentMode::Mailbox, thus discarding superfluous frames)
-                    //
-                    // winit has window.current_monitor().video_modes() but that is a list of all full screen video modes.
-                    // So without extra dependencies it's a bit tricky to get the max refresh rate we can run the window on.
-                    // Therefore we just go with 60fps - sorry 120hz+ folks!
-                    let target_frametime = Duration::from_secs_f64(1.0 / 60.0);
                     let time_since_last_frame = last_update_inst.elapsed();
                     if time_since_last_frame >= target_frametime {
                         window.request_redraw();
@@ -79,6 +76,9 @@ pub(crate) fn init_event_loop<S: 'static + Scene>(
                         );
                     }
                 }
+
+                #[cfg(target_arch = "wasm32")]
+                window.request_redraw();
             }
 
             // On request redraw
@@ -87,7 +87,7 @@ pub(crate) fn init_event_loop<S: 'static + Scene>(
                     context: &mut gpu,
                     surface: &mut surface,
                 });
-                gpu.submit_queue(&mut surface)
+                gpu.submit_queue(&mut surface);
             }
 
             // Discard other events

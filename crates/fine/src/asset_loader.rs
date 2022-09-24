@@ -1,28 +1,28 @@
 use crate::render::prelude::{GeometryData, IndiceValues, VertexValues};
 use crate::transform::Transform;
 use glam::Mat4;
-use gltf::{buffer::Source, Gltf};
+// use gltf::{buffer::Source, Gltf};
 use std::path::Path;
 
 pub fn load_gltf<P>(path: P)
 where
     P: AsRef<Path>,
 {
-    let gltf = Gltf::open(path).expect("[gltf] Does not exist.");
+    // let gltf = Gltf::open(path).expect("[gltf] Does not exist.");
 
-    // let mut geometries: Vec<GeometryData> = Vec::new();
-    let mut buffers_data: Vec<Vec<u8>> = Vec::new();
+    // // let mut geometries: Vec<GeometryData> = Vec::new();
+    // let mut buffers_data: Vec<Vec<u8>> = Vec::new();
 
-    for buffer in gltf.buffers() {
-        match buffer.source() {
-            Source::Bin => {
-                if let Some(blob) = gltf.blob.as_deref() {
-                    buffers_data.push(blob.into());
-                }
-            }
-            _ => unimplemented!(),
-        }
-    }
+    // for buffer in gltf.buffers() {
+    //     match buffer.source() {
+    //         Source::Bin => {
+    //             if let Some(blob) = gltf.blob.as_deref() {
+    //                 buffers_data.push(blob.into());
+    //             }
+    //         }
+    //         _ => unimplemented!(),
+    //     }
+    // }
 
     // for mesh in gltf.meshes() {
     //     for primitive in mesh.primitives() {

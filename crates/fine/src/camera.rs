@@ -87,9 +87,8 @@ impl Camera {
 
 impl NodeVisitor for Camera {
     #[inline]
-    fn update_world_matrix(&mut self, parent: Option<&Node>) {
-        let is_invalid = self.node.is_invalid(parent);
-        if is_invalid {
+    fn update_world_matrix(&mut self, parent: &Node) {
+        if self.node.is_invalid() {
             self.node.update_world_matrix(parent);
             self.view = self.node.get_world_matrix().inverse();
 
