@@ -1,4 +1,5 @@
 use std::time::{Duration, Instant};
+use std::future::Future;
 
 use crate::frame::Frame;
 use crate::render::context::{Context, Surface};
@@ -9,6 +10,44 @@ use winit::{
     event_loop::{ControlFlow, EventLoop},
     window::{Window, WindowBuilder},
 };
+
+#[cfg(not(target_arch = "wasm32"))]
+pub struct Spawner<'a> {
+    executor: async_executor::LocalExecutor<'a>,
+}
+
+#[cfg(not(target_arch = "wasm32"))]
+impl<'a> Spawner<'a> {
+    fn new() -> Self {
+        Self {
+            executor: async_executor::LocalExecutor::new(),
+        }
+    }
+
+    #[allow(dead_code)]
+    pub fn spawn_local(&self, future: impl Future<Output = ()> + 'a) {
+        self.executor.spawn(future).detach();
+    }
+
+    fn run_until_stalled(&self) {
+        while self.executor.try_tick() {}
+    }
+}
+
+#[cfg(target_arch = "wasm32")]
+pub struct Spawner {}
+
+#[cfg(target_arch = "wasm32")]
+impl Spawner {
+    fn new() -> Self {
+        Self {}
+    }
+
+    #[allow(dead_code)]
+    pub fn spawn_local(&self, future: impl Future<Output = ()> + 'static) {
+        wasm_bindgen_futures::spawn_local(future);
+    }
+}
 
 pub(crate) async fn init_gpu_context() -> (EventLoop<()>, Window, Context, Surface) {
     let event_loop = EventLoop::new();
@@ -33,6 +72,8 @@ pub(crate) fn init_event_loop<S: 'static + Scene>(
 
     let size = window.inner_size();
     surface.resize(&gpu, size.width, size.height);
+
+    let spawner = Spawner::new();
 
     #[cfg(not(target_arch = "wasm32"))]
     let mut last_update_inst = Instant::now();
@@ -63,21 +104,8 @@ pub(crate) fn init_event_loop<S: 'static + Scene>(
 
             Event::RedrawEventsCleared => {
                 #[cfg(not(target_arch = "wasm32"))]
-                {
-                    // Clamp to some max framerate to avoid busy-looping too much
-                    // (we might be in wgpu::PresentMode::Mailbox, thus discarding superfluous frames)
-                    let time_since_last_frame = last_update_inst.elapsed();
-                    if time_since_last_frame >= target_frametime {
-                        window.request_redraw();
-                        last_update_inst = Instant::now();
-                    } else {
-                        *control_flow = ControlFlow::WaitUntil(
-                            Instant::now() + target_frametime - time_since_last_frame,
-                        );
-                    }
-                }
+                spawner.run_until_stalled();
 
-                #[cfg(target_arch = "wasm32")]
                 window.request_redraw();
             }
 

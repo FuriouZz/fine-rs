@@ -41,7 +41,7 @@ impl Context {
 
         let surface_configuration = wgpu::SurfaceConfiguration {
             usage: options.usage,
-            format: options.format,
+            format: options.format.unwrap_or(surface.get_supported_formats(&adapter)[0]),
             width: 800,
             height: 600,
             present_mode: options.present_mode,
@@ -69,7 +69,7 @@ impl Context {
 
     pub fn create_wgsl_shader(&self, source: &str) -> wgpu::ShaderModule {
         self.device
-            .create_shader_module(&wgpu::ShaderModuleDescriptor {
+            .create_shader_module(wgpu::ShaderModuleDescriptor {
                 label: Some("[fine_render] Create shader module"),
                 source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(source)),
             })
@@ -166,6 +166,10 @@ impl Context {
             .create_command_encoder(&wgpu::CommandEncoderDescriptor { label: None });
         let current = std::mem::replace(&mut self.encoder, encoder);
         self.queue.submit(Some(current.finish()));
-        surface.output = None;
+
+        let output = std::mem::replace(&mut surface.output, None);
+        if let Some(output) = output {
+            output.present();
+        }
     }
 }

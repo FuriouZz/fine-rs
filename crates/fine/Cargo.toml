@@ -8,15 +8,19 @@ license = "MIT OR Apache-2.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-winit = "0.25.0"
+winit = "0.27.3"
 fine_render = { path = "../fine_render" }
 fine_transform = { path = "../fine_transform" }
 # gltf = "0.16"
 bytemuck = "1.4.1"
-glam = { version = "0.19.0", features = ["bytemuck"] }
+glam = { version = "0.21.3", features = ["bytemuck"] }
+async-executor = "1.0"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 futures = { version = "0.3.17", default-features = false, features = ["std", "executor"] }
 
 [target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen-futures = "0.4.18"
+
+[target.'cfg(not(target_arch = "wasm32"))'.dev-dependencies]
+async-executor = "1.0"

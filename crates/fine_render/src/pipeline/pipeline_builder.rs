@@ -67,6 +67,7 @@ impl PipelineBuilder {
                 primitive: self.primitive,
                 multisample: self.multisample,
                 depth_stencil: self.depth_stencil,
+                multiview: None,
             });
 
         RenderPipeline {
