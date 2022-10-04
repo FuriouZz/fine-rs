@@ -1,4 +1,4 @@
-use fine_math::{Mat3, Quat, Vec3};
+use math::{Mat3, Quat, Vec3};
 
 #[derive(Debug, Clone)]
 pub struct Transform {

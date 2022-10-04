@@ -9,9 +9,9 @@ license = "MIT OR Apache-2.0"
 
 [dependencies]
 winit = "0.27.3"
-fine_render = { path = "../fine_render" }
-fine_transform = { path = "../fine_transform" }
-fine_math = { path = "../fine_math" }
+render = { path = "../render" }
+transform = { path = "../transform" }
+math = { path = "../math" }
 # gltf = "0.16"
 bytemuck = "1.4.1"
 glam = { version = "0.21.3", features = ["bytemuck"] }

@@ -508,37 +508,13 @@ version = "0.1.0"
 dependencies = [
  "async-executor",
  "bytemuck",
- "fine_math",
- "fine_render",
- "fine_transform",
  "futures",
  "glam",
+ "math",
+ "render",
+ "transform",
  "wasm-bindgen-futures",
  "winit",
-]
-
-[[package]]
-name = "fine_math"
-version = "0.1.0"
-dependencies = [
- "glam",
-]
-
-[[package]]
-name = "fine_render"
-version = "0.1.0"
-dependencies = [
- "bytemuck",
- "image",
- "raw-window-handle 0.4.3",
- "wgpu",
-]
-
-[[package]]
-name = "fine_transform"
-version = "0.1.0"
-dependencies = [
- "fine_math",
 ]
 
 [[package]]
@@ -999,6 +975,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "math"
+version = "0.1.0"
+dependencies = [
+ "glam",
+]
+
+[[package]]
 name = "maybe-uninit"
 version = "2.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1444,6 +1427,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "render"
+version = "0.1.0"
+dependencies = [
+ "bytemuck",
+ "image",
+ "raw-window-handle 0.4.3",
+ "wgpu",
+]
+
+[[package]]
 name = "renderdoc-sys"
 version = "0.7.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1689,6 +1682,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a31142970826733df8241ef35dc040ef98c679ab14d7c3e54d827099b3acecaa"
 dependencies = [
  "serde",
+]
+
+[[package]]
+name = "transform"
+version = "0.1.0"
+dependencies = [
+ "math",
 ]
 
 [[package]]

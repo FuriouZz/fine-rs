@@ -70,7 +70,7 @@ impl Context {
     pub fn create_wgsl_shader(&self, source: &str) -> wgpu::ShaderModule {
         self.device
             .create_shader_module(wgpu::ShaderModuleDescriptor {
-                label: Some("[fine_render] Create shader module"),
+                label: Some("Context::create_wgsl_shader"),
                 source: wgpu::ShaderSource::Wgsl(Cow::Borrowed(source)),
             })
     }
