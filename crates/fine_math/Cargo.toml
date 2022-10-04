@@ -1,5 +1,5 @@
 [package]
-name = "fine_transform"
+name = "fine_math"
 version = "0.1.0"
 authors = ["furiouzz <info@chrsmsln.com>"]
 edition = "2021"
@@ -8,4 +8,4 @@ license = "MIT OR Apache-2.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-fine_math = { path = "../fine_math" }
+glam = "0.21.3"

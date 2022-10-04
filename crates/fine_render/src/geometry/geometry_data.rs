@@ -1,12 +1,11 @@
 use crate::prelude::Context;
-use std::collections::HashMap;
 
 pub use super::IndiceValues;
 pub use super::VertexValues;
 
 #[derive(Debug)]
 pub struct GeometryData {
-    vertex_values: HashMap<&'static str, VertexValues>,
+    vertex_values: Vec<VertexValues>,
     index_values: Option<IndiceValues>,
     vertex_size: u64,
 }
@@ -14,31 +13,28 @@ pub struct GeometryData {
 impl GeometryData {
     pub fn new() -> Self {
         Self {
-            vertex_values: HashMap::new(),
+            vertex_values: Vec::new(),
             index_values: None,
             vertex_size: 0,
         }
     }
 
-    pub fn set_attribute(&mut self, name: &'static str, values: VertexValues) {
+    pub fn set_attribute(&mut self, values: VertexValues) {
         self.vertex_size += values.attribute_size();
-
-        self.vertex_values.insert(name, values);
+        self.vertex_values.push(values);
     }
 
     pub fn set_indices(&mut self, values: Option<IndiceValues>) {
         self.index_values = values;
     }
 
+    #[inline]
     pub fn vertex_size(&self) -> u64 {
         self.vertex_size
     }
 
-    pub fn values(&self) -> Vec<(&'static str, &VertexValues)> {
-        self.vertex_values
-            .iter()
-            .map(|(name, values)| (*name, values))
-            .collect()
+    pub fn values(&self) -> Vec<&VertexValues> {
+        self.vertex_values.iter().map(|values| values).collect()
     }
 
     pub fn indices(&self) -> Option<&IndiceValues> {
@@ -51,13 +47,12 @@ impl GeometryData {
 
     pub fn compute_vertex_count(&self) -> usize {
         let mut vertex_count: Option<usize> = None;
-        for (name, values) in self.vertex_values.iter() {
+        for (index, values) in self.vertex_values.iter().enumerate() {
             let count = values.len();
             if let Some(vertex_count) = vertex_count {
                 assert_eq!(
                     vertex_count, count,
-                    "Attribute {} does not have the same number of vertex",
-                    name
+                    "Attribute at index {index} does not have the same number of vertex"
                 );
             }
             vertex_count = Some(count);
@@ -70,7 +65,7 @@ impl GeometryData {
         let vertex_size = self.vertex_size as usize;
         let mut attribute_offset = 0;
         let mut v = vec![0; vertex_size * vertex_count];
-        for values in self.vertex_values.values() {
+        for values in self.vertex_values.iter() {
             let attribute_size = values.attribute_size() as usize;
             let bytes = values.get_bytes();
             for (index, chunk) in bytes.chunks_exact(attribute_size).enumerate() {
@@ -89,17 +84,35 @@ impl GeometryData {
     }
 
     pub fn create_vertex_attributes(&self) -> Vec<wgpu::VertexAttribute> {
+        let locations = self
+            .vertex_values
+            .iter()
+            .enumerate()
+            .map(|(location, _)| location as u32);
+        self.create_vertex_attributes_with_locations(locations)
+    }
+
+    pub fn create_vertex_attributes_with_locations(
+        &self,
+        locations: impl Iterator<Item = u32>,
+    ) -> Vec<wgpu::VertexAttribute> {
         let mut offset = 0;
-        let mut v = Vec::new();
-        for values in self.vertex_values.values() {
-            let attribute = wgpu::VertexAttribute {
-                shader_location: v.len() as u32,
-                format: values.attribute_format(),
-                offset,
-            };
-            v.push(attribute);
-            offset += values.attribute_size();
-        }
-        v
+        self.vertex_values
+            .iter()
+            .zip(locations)
+            .map(|(values, shader_location)| {
+                let attribute = wgpu::VertexAttribute {
+                    shader_location,
+                    format: values.attribute_format(),
+                    offset,
+                };
+                offset += values.attribute_size();
+                return attribute;
+            })
+            .collect::<_>()
+    }
+
+    pub fn create_geometry(&self, cx: &super::Context) -> super::Geometry {
+        super::Geometry::new(cx, &self)
     }
 }

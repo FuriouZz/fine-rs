@@ -1,4 +1,4 @@
-use glam::Mat4;
+use fine_math::Mat4;
 
 use crate::transform::Transform;
 
@@ -8,8 +8,7 @@ pub struct Node {
     local_matrix: Mat4,
     invalid_local_matrix: bool,
     world_matrix: Mat4,
-    world_id: u16,
-    world_parent_id: u16,
+    invalid_world_matrix: bool,
 }
 
 impl Default for Node {
@@ -19,8 +18,7 @@ impl Default for Node {
             local_matrix: Mat4::IDENTITY,
             invalid_local_matrix: false,
             world_matrix: Mat4::IDENTITY,
-            world_id: 0,
-            world_parent_id: 0,
+            invalid_world_matrix: false,
         }
     }
 }
@@ -47,9 +45,14 @@ impl Node {
         &self.transform
     }
 
+    pub fn get_mut_transform(&mut self) -> &mut Transform {
+        self.invalidate();
+        &mut self.transform
+    }
+
     pub fn set_transform(&mut self, transform: Transform) {
         self.transform = transform;
-        self.invalid_local_matrix = true;
+        self.invalidate();
     }
 
     pub fn get_world_matrix(&self) -> &Mat4 {
@@ -62,6 +65,7 @@ impl Node {
 
     pub fn invalidate(&mut self) {
         self.invalid_local_matrix = true;
+        self.invalid_world_matrix = true;
     }
 
     pub fn update_local_matrix(&mut self) {
@@ -74,13 +78,19 @@ impl Node {
         }
     }
 
-    pub fn update_world_matrix(&mut self, parent: &Node) {
+    pub fn update_world_matrix(&mut self, parent: Option<&Node>) {
         self.update_local_matrix();
 
-        if self.world_parent_id != parent.world_id {
-            self.world_matrix = parent.world_matrix.mul_mat4(&self.local_matrix);
-            self.world_parent_id = parent.world_id;
-            self.world_id += 1;
+        if self.invalid_world_matrix {
+            if let Some(parent) = parent {
+                self.world_matrix = parent.world_matrix.mul_mat4(&self.local_matrix);
+            } else {
+                self.world_matrix = self.local_matrix.clone();
+            }
         }
+    }
+
+    pub fn get_raw_world_matrix(&self) -> [f32; 16] {
+        self.world_matrix.to_cols_array()
     }
 }

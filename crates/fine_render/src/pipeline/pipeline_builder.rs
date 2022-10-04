@@ -53,14 +53,14 @@ impl PipelineBuilder {
     ) -> RenderPipeline {
         let pipeline_layout = self.device
             .create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-                label: Some("PipelineData"),
+                label: Some("PipelineBuilder"),
                 bind_group_layouts: &self.bind_group_layouts.iter().collect::<Vec<_>>(),
                 push_constant_ranges: &[],
             });
 
         let pipeline = self.device
             .create_render_pipeline(&wgpu::RenderPipelineDescriptor {
-                label: Some("PipelineData"),
+                label: Some("PipelineBuilder"),
                 layout: Some(&pipeline_layout),
                 vertex,
                 fragment,

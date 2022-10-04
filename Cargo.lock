@@ -508,12 +508,20 @@ version = "0.1.0"
 dependencies = [
  "async-executor",
  "bytemuck",
+ "fine_math",
  "fine_render",
  "fine_transform",
  "futures",
  "glam",
  "wasm-bindgen-futures",
  "winit",
+]
+
+[[package]]
+name = "fine_math"
+version = "0.1.0"
+dependencies = [
+ "glam",
 ]
 
 [[package]]
@@ -530,7 +538,7 @@ dependencies = [
 name = "fine_transform"
 version = "0.1.0"
 dependencies = [
- "glam",
+ "fine_math",
 ]
 
 [[package]]

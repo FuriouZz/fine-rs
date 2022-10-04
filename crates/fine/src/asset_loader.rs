@@ -1,10 +1,10 @@
-use crate::render::prelude::{GeometryData, IndiceValues, VertexValues};
-use crate::transform::Transform;
-use glam::Mat4;
+// use crate::render::prelude::{GeometryData, IndiceValues, VertexValues};
+// use crate::transform::Transform;
+// use glam::Mat4;
 // use gltf::{buffer::Source, Gltf};
 use std::path::Path;
 
-pub fn load_gltf<P>(path: P)
+pub fn load_gltf<P>(_path: P)
 where
     P: AsRef<Path>,
 {

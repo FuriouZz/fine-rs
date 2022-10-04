@@ -1,7 +1,7 @@
-use fine_render::prelude::{wgpu, OPENGL_TO_WGPU_MATRIX};
 use fine_transform::{Node, NodeVisitor};
 use glam::Mat4;
 
+#[derive(Debug, Clone)]
 pub struct OrthographicOptions {
     pub left: f32,
     pub right: f32,
@@ -26,6 +26,7 @@ impl Default for OrthographicOptions {
     }
 }
 
+#[derive(Debug, Clone)]
 pub struct PerspectiveOptions {
     pub fovy: f32,
     pub aspect: f32,
@@ -44,20 +45,35 @@ impl Default for PerspectiveOptions {
     }
 }
 
+pub enum CameraProjection {
+    Perspective(PerspectiveOptions),
+    Orthographic(OrthographicOptions),
+}
+
+impl Default for CameraProjection {
+    fn default() -> Self {
+        Self::Orthographic(Default::default())
+    }
+}
+
 pub struct Camera {
-    pub view: Mat4,
-    pub projection: Mat4,
-    pub projection_view: Mat4,
     pub node: Node,
+    view_matrix: Mat4,
+    projection_matrix: Mat4,
+    projection_view_matrix: Mat4,
+    projection_invalid: bool,
+    projection: CameraProjection,
 }
 
 impl Default for Camera {
     fn default() -> Self {
         Self {
-            view: Mat4::IDENTITY,
-            projection: Mat4::IDENTITY,
-            projection_view: Mat4::IDENTITY,
+            view_matrix: Mat4::IDENTITY,
+            projection_matrix: Mat4::IDENTITY,
+            projection_view_matrix: Mat4::IDENTITY,
             node: Node::new(),
+            projection_invalid: false,
+            projection: Default::default(),
         }
     }
 }
@@ -67,32 +83,62 @@ impl Camera {
         Self::default()
     }
 
-    pub fn perspective(&mut self, options: PerspectiveOptions) {
-        self.projection = Mat4::perspective_rh(options.fovy, options.aspect, options.near, options.far);
+    pub fn get_projection(&self) -> &CameraProjection {
+        &self.projection
+    }
+
+    pub fn get_mut_projection(&mut self) -> &mut CameraProjection {
+        let projection = &mut self.projection;
+        self.projection_invalid = true;
+        self.node.invalidate();
+        projection
+    }
+
+    pub fn get_view_matrix(&self) -> &Mat4 {
+        &self.view_matrix
+    }
+
+    pub fn get_projection_matrix(&self) -> &Mat4 {
+        &self.projection_matrix
+    }
+
+    pub fn get_projection_view_matrix(&self) -> &Mat4 {
+        &self.projection_view_matrix
+    }
+
+    pub fn invalidate(&mut self) {
+        self.projection_invalid = true;
         self.node.invalidate();
     }
 
-    pub fn orthographic(&mut self, options: OrthographicOptions) {
-        self.projection = Mat4::orthographic_rh(
-                options.left / options.zoom,
-                options.right / options.zoom,
-                options.bottom / options.zoom,
-                options.top / options.zoom,
-                options.near,
-                options.far,
-            );
-        self.node.invalidate();
+    pub fn update_projection(&mut self) {
+        if self.projection_invalid {
+            match &self.projection {
+                CameraProjection::Orthographic(options) => {
+                    self.projection_matrix = Mat4::orthographic_rh(
+                        options.left / options.zoom,
+                        options.right / options.zoom,
+                        options.bottom / options.zoom,
+                        options.top / options.zoom,
+                        options.near,
+                        options.far,
+                    );
+                }
+                CameraProjection::Perspective(options) => {
+                    self.projection_matrix = Mat4::perspective_rh(options.fovy, options.aspect, options.near, options.far);
+                }
+            }
+        }
     }
 }
 
 impl NodeVisitor for Camera {
     #[inline]
-    fn update_world_matrix(&mut self, parent: &Node) {
+    fn update_world_matrix(&mut self, parent: Option<&Node>) {
         if self.node.is_invalid() {
             self.node.update_world_matrix(parent);
-            self.view = self.node.get_world_matrix().inverse();
-
-            self.projection_view = self.projection * self.view;
+            self.view_matrix = self.node.get_world_matrix().inverse();
+            self.projection_view_matrix = self.projection_matrix * self.view_matrix;
         }
     }
 }

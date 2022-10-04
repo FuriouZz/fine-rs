@@ -1,4 +1,3 @@
-use std::time::{Duration, Instant};
 use std::future::Future;
 
 use crate::frame::Frame;
@@ -75,17 +74,8 @@ pub(crate) fn init_event_loop<S: 'static + Scene>(
 
     let spawner = Spawner::new();
 
-    #[cfg(not(target_arch = "wasm32"))]
-    let mut last_update_inst = Instant::now();
-
-    // winit has window.current_monitor().video_modes() but that is a list of all full screen video modes.
-    // So without extra dependencies it's a bit tricky to get the max refresh rate we can run the window on.
-    // Therefore we just go with 60fps - sorry 120hz+ folks!
-    #[cfg(not(target_arch = "wasm32"))]
-    let target_frametime = Duration::from_secs_f64(1.0 / 60.0);
-
     event_loop.run(move |event, _, control_flow| {
-        *control_flow = ControlFlow::Wait;
+        *control_flow = ControlFlow::Poll;
 
         match event {
             // On close
@@ -107,6 +97,10 @@ pub(crate) fn init_event_loop<S: 'static + Scene>(
                 spawner.run_until_stalled();
 
                 window.request_redraw();
+            }
+
+            Event::MainEventsCleared => {
+                scene.on_update();
             }
 
             // On request redraw

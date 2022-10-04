@@ -4,6 +4,11 @@ pub mod render {
 pub mod transform {
     pub use fine_transform::*;
 }
+
+pub mod math {
+    pub use fine_math::*;
+}
+
 pub mod asset_loader;
 pub mod camera;
 pub mod frame;

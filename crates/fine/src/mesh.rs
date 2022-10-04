@@ -7,7 +7,7 @@ pub struct Mesh {
 
 impl NodeVisitor for Mesh {
     #[inline]
-    fn update_world_matrix(&mut self, parent: &Node) {
+    fn update_world_matrix(&mut self, parent: Option<&Node>) {
         self.node.update_world_matrix(parent);
     }
 }
